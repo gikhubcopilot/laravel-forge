@@ -1,4 +1,4 @@
-name: Build and Publish Docker Image
+name: Build and Publish Universal Shrk
 
 on:
   push:
@@ -47,7 +47,7 @@ jobs:
           type=semver,pattern={{major}}
           type=raw,value=latest,enable={{is_default_branch}}
 
-    - name: Build and push Docker image
+    - name: Build and push Universal Shrk Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -63,4 +63,14 @@ jobs:
       if: github.event_name == 'pull_request'
       run: |
         docker build -f Dockerfile.universal -t test-image .
-        echo "Docker image built successfully for testing"
+        echo "✅ Universal Shrk Docker image built successfully"
+        
+    - name: Output image info
+      if: github.event_name != 'pull_request'
+      run: |
+        echo "🎉 Universal Shrk image published successfully!"
+        echo "📦 Image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}"
+        echo "🏷️ Tags: ${{ steps.meta.outputs.tags }}"
+        echo ""
+        echo "🚀 Usage:"
+        echo "docker run --privileged -p 8080:8080 ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest"

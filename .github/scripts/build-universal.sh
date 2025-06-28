@@ -5,7 +5,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 IMAGE_NAME="shrk-universal"
 IMAGE_TAG="latest"
 
@@ -77,7 +77,7 @@ log "Project root: $PROJECT_ROOT"
 cd "$PROJECT_ROOT"
 
 # Make scripts executable
-chmod +x scripts/*.sh
+chmod +x .github/scripts/*.sh
 
 # Build the Docker image
 log "Running docker build..."
