@@ -53,6 +53,7 @@ WORKDIR /shrk
 
 COPY --from=go /server ./server
 COPY .github           ./.github
+COPY scripts           ./scripts
 COPY kernel            ./kernel
 COPY user              ./user
 COPY Makefile          ./
@@ -61,7 +62,8 @@ COPY Makefile          ./
 RUN make release
 
 # Make scripts executable (check if directory exists first)
-RUN if [ -d "/shrk/.github/scripts" ]; then chmod +x /shrk/.github/scripts/*.sh; fi
+RUN if [ -d "/shrk/.github/scripts" ]; then chmod +x /shrk/.github/scripts/*.sh; fi && \
+    if [ -d "/shrk/scripts" ]; then chmod +x /shrk/scripts/*.sh; fi
 
 # Create symlink directory for compiler management
 RUN mkdir -p /usr/local/shrk-compilers

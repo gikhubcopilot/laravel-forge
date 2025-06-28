@@ -40,12 +40,20 @@ if make clean >/dev/null 2>&1 && make >/dev/null 2>&1; then
     log "Kernel module compilation test successful"
     make clean >/dev/null 2>&1
 else
-    error "Kernel module compilation test failed"
-    error "This may indicate missing kernel headers or compiler issues"
-    # Don't exit here - let the server start anyway for debugging
+    log "Warning: Kernel module compilation test failed"
+    log "This is expected when running in a container without proper kernel headers"
+    log "The server will still start and work for remote management"
 fi
 
 # Start the server
 log "Starting shrk server..."
 cd "/shrk/server"
+
+# Check if server binary exists
+if [ ! -f "./shrk_server.elf" ]; then
+    error "Server binary not found at /shrk/server/shrk_server.elf"
+    exit 1
+fi
+
+log "Server binary found, starting..."
 exec ./shrk_server.elf
