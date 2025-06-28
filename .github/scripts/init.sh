@@ -18,7 +18,7 @@ log "Starting shrk universal container..."
 
 # Run environment detection
 log "Running environment detection..."
-if ! /.github/scripts/detect-env.sh; then
+if ! /shrk/.github/scripts/detect-env.sh; then
     error "Environment detection failed"
     exit 1
 fi
