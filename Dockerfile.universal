@@ -65,6 +65,13 @@ RUN make release
 RUN if [ -d "/shrk/.github/scripts" ]; then chmod +x /shrk/.github/scripts/*.sh; fi && \
     if [ -d "/shrk/scripts" ]; then chmod +x /shrk/scripts/*.sh; fi
 
+# Install additional tools needed for advanced compiler detection
+RUN apt-get update && apt-get install -y \
+    grep \
+    sed \
+    coreutils \
+    && rm -rf /var/lib/apt/lists/*
+
 # Create symlink directory for compiler management
 RUN mkdir -p /usr/local/shrk-compilers
 

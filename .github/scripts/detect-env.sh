@@ -26,36 +26,40 @@ detect_host_compiler() {
     local proc_version=$(cat /proc/version)
     log "Host kernel version: $proc_version"
     
-    # Extract GCC version from /proc/version
-    # Examples:
-    # "gcc version 13.2.0 (Ubuntu 13.2.0-23ubuntu4)"
-    # "gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0"
+    # Extract GCC version from /proc/version with more robust patterns
+    local gcc_version=""
     
-    if echo "$proc_version" | grep -q "gcc"; then
-        # Try different patterns to extract GCC version
-        local gcc_version=""
-        
-        # Pattern 1: gcc version X.Y.Z
-        gcc_version=$(echo "$proc_version" | sed -n 's/.*gcc version \([0-9]\+\)\.\([0-9]\+\)\.\([0-9]\+\).*/\1/p')
-        
-        # Pattern 2: gcc (distro info) X.Y.Z
-        if [ -z "$gcc_version" ]; then
-            gcc_version=$(echo "$proc_version" | sed -n 's/.*gcc.*) \([0-9]\+\)\.\([0-9]\+\)\.\([0-9]\+\).*/\1/p')
-        fi
-        
-        # Pattern 3: more flexible extraction
-        if [ -z "$gcc_version" ]; then
-            gcc_version=$(echo "$proc_version" | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' | head -1 | cut -d. -f1)
-        fi
-        
-        if [ -n "$gcc_version" ]; then
-            log "Detected host GCC major version: $gcc_version"
-            echo "$gcc_version"
-            return 0
-        fi
+    # Pattern 1: "gcc version X.Y.Z"
+    gcc_version=$(echo "$proc_version" | grep -oP 'gcc version \K[0-9]+' | head -1)
+    
+    # Pattern 2: "gcc (Ubuntu X.Y.Z-something) X.Y.Z"
+    if [ -z "$gcc_version" ]; then
+        gcc_version=$(echo "$proc_version" | grep -oP 'gcc \([^)]*\) \K[0-9]+' | head -1)
+    fi
+    
+    # Pattern 3: Extract from Ubuntu package info
+    if [ -z "$gcc_version" ]; then
+        gcc_version=$(echo "$proc_version" | grep -oP 'Ubuntu [0-9]+-[0-9]+\.[0-9]+\.[0-9]+-[^)]*\) \K[0-9]+' | head -1)
+    fi
+    
+    # Pattern 4: Extract any version number after gcc
+    if [ -z "$gcc_version" ]; then
+        gcc_version=$(echo "$proc_version" | grep -oP 'gcc[^0-9]*\K[0-9]+' | head -1)
+    fi
+    
+    # Pattern 5: Look for specific Ubuntu pattern
+    if [ -z "$gcc_version" ]; then
+        gcc_version=$(echo "$proc_version" | sed -n 's/.*x86_64-linux-gnu-gcc-\([0-9]\+\).*/\1/p')
+    fi
+    
+    if [ -n "$gcc_version" ]; then
+        log "Detected host GCC major version: $gcc_version"
+        echo "$gcc_version"
+        return 0
     fi
     
     error "Could not detect GCC version from /proc/version"
+    log "Proc version content: $proc_version"
     return 1
 }
 

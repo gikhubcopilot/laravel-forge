@@ -16,19 +16,24 @@ error() {
 
 log "Starting shrk universal container..."
 
-# Run environment detection
-log "Running environment detection..."
-if ! /shrk/.github/scripts/detect-env.sh; then
-    error "Environment detection failed"
-    exit 1
+# Run advanced compiler setup for exact version matching
+log "Setting up exact compiler match..."
+if ! /shrk/.github/scripts/setup-compiler.sh; then
+    log "Advanced compiler setup failed, falling back to basic detection..."
+    if ! /shrk/.github/scripts/detect-env.sh; then
+        error "Both advanced and basic environment detection failed"
+        exit 1
+    fi
 fi
 
-# Source the environment variables set by detect-env.sh
+# Source the environment variables set by compiler setup
 if [ -f /usr/local/shrk-compilers/gcc ]; then
     export CC="/usr/local/shrk-compilers/gcc"
     export CXX="/usr/local/shrk-compilers/g++"
+    export HOSTCC="/usr/local/shrk-compilers/gcc"
     export PATH="/usr/local/shrk-compilers:$PATH"
-    log "Environment variables set for kernel module compilation"
+    log "Environment variables set for exact compiler matching"
+    log "Using compiler: $($CC --version | head -1)"
 else
     log "Warning: Custom compiler not found, using system defaults"
 fi
